@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speak with SQL</title>
+  <style>
+    body {
+      background: #f4f6fb;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .chat-container {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      width: 370px;
+      max-width: 95vw;
+      padding: 24px 18px 12px 18px;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .chat-window {
+      background: #f1f3f7;
+      border-radius: 8px;
+      min-height: 220px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding: 12px;
+      margin-bottom: 14px;
+      font-size: 1rem;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .message {
+      padding: 7px 12px;
+      border-radius: 16px;
+      max-width: 80%;
+      word-break: break-word;
+      display: inline-block;
+    }
+    .user {
+      align-self: flex-end;
+      background: #3182ce;
+      color: #fff;
+    }
+    .bot {
+      align-self: flex-start;
+      background: #e2e8f0;
+      color: #2d3748;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .chat-input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 16px;
+      border: 1px solid #cbd5e1;
+      font-size: 1rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .chat-input:focus {
+      border: 1.5px solid #3182ce;
+    }
+    .send-btn {
+      background: #3182ce;
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      padding: 8px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .send-btn:hover {
+      background: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-title">Speak with SQL</div>
+    <div class="chat-window" id="chatWindow"></div>
+    <form class="input-row" id="chatForm" autocomplete="off">
+      <input type="text" id="chatInput" class="chat-input" placeholder="Type your message..." required />
+      <button type="submit" class="send-btn">Send</button>
+    </form>
+  </div>
+  <script>
+    const chatWindow = document.getElementById('chatWindow');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+
+    function appendMessage(text, sender) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${sender}`;
+      msgDiv.textContent = text;
+      chatWindow.appendChild(msgDiv);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = chatInput.value.trim();
+      if (!message) return;
+      appendMessage(message, 'user');
+      chatInput.value = '';
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+        const data = await res.json();
+        appendMessage(data.reply, 'bot');
+      } catch (err) {
+        appendMessage('Error: Could not reach server.', 'bot');
+      }
+    });
+  </script>
+</body>
+</html>
