@@ -1,7 +1,7 @@
 {
   "name": "speakwithsql",
   "version": "1.0.0",
-  "description": "A chat app boilerplate for Speak with SQL.",
+  "description": "SpeakWithSQL: Natural language to SQL generator using OpenAI. Converts user questions to SQL queries for academic and research data.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -16,5 +16,15 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.3"
-  }
+  },
+  "author": "Mehmet Alp <mehmet.alp@rastmobile.com>",
+  "keywords": [
+    "speak to sql",
+    "speak to db",
+    "sql generator",
+    "openai",
+    "natural language to sql",
+    "academic data",
+    "research data"
+  ]
 }
