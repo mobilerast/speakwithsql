@@ -204,17 +204,19 @@
         <option value="MSSQL">MSSQL</option>
       </select>
     </div>
-    <div id="mysqlConfigBox" style="background:#f8fafc;padding:16px 18px 10px 18px;border-bottom:1px solid #e2e8f0;">
-      <form id="mysqlConfigForm" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:center;">
-        <input type="text" id="mysqlHost" placeholder="Host" style="width:110px;padding:6px 10px;border-radius:8px;border:1px solid #cbd5e1;" required />
-        <input type="number" id="mysqlPort" placeholder="Port" style="width:70px;padding:6px 10px;border-radius:8px;border:1px solid #cbd5e1;" value="3306" required />
-        <input type="text" id="mysqlUser" placeholder="User" style="width:90px;padding:6px 10px;border-radius:8px;border:1px solid #cbd5e1;" required />
-        <input type="password" id="mysqlPassword" placeholder="Password" style="width:110px;padding:6px 10px;border-radius:8px;border:1px solid #cbd5e1;" />
-        <input type="text" id="mysqlDatabase" placeholder="Database" style="width:110px;padding:6px 10px;border-radius:8px;border:1px solid #cbd5e1;" required />
-        <button type="submit" id="mysqlConnectBtn" style="padding:6px 18px;border-radius:8px;background:#3182ce;color:#fff;border:none;font-weight:600;cursor:pointer;">Connect</button>
-        <span id="mysqlStatus" style="font-size:0.98rem;margin-left:10px;"></span>
+    <div id="mysqlConfigBox" style="background:#f8fafc;padding:18px 18px 12px 18px;border-bottom:1px solid #e2e8f0;">
+      <form id="mysqlConfigForm" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px 18px;align-items:center;justify-content:center;max-width:600px;margin:0 auto;">
+        <input type="text" id="mysqlHost" placeholder="Host (e.g. 127.0.0.1)" style="padding:8px 12px;border-radius:8px;border:1px solid #cbd5e1;font-size:1rem;" required />
+        <input type="number" id="mysqlPort" placeholder="Port (e.g. 3306)" style="padding:8px 12px;border-radius:8px;border:1px solid #cbd5e1;font-size:1rem;" value="3306" required />
+        <input type="text" id="mysqlUser" placeholder="User" style="padding:8px 12px;border-radius:8px;border:1px solid #cbd5e1;font-size:1rem;" required />
+        <input type="password" id="mysqlPassword" placeholder="Password" style="padding:8px 12px;border-radius:8px;border:1px solid #cbd5e1;font-size:1rem;" autocomplete="current-password" />
+        <input type="text" id="mysqlDatabase" placeholder="Database" style="padding:8px 12px;border-radius:8px;border:1px solid #cbd5e1;font-size:1rem;" required />
+        <button type="submit" id="mysqlConnectBtn" style="padding:8px 0;border-radius:8px;background:#3182ce;color:#fff;border:none;font-weight:600;cursor:pointer;font-size:1rem;grid-column:1/4;">Connect & Fetch Schema</button>
       </form>
-      <div id="mysqlSchemaBox" style="margin-top:10px;max-height:120px;overflow:auto;font-size:0.97rem;color:#4a5568;background:#f1f3f7;padding:8px 10px;border-radius:8px;display:none;"></div>
+      <div style="text-align:center;margin-top:8px;">
+        <span id="mysqlStatus" style="font-size:1rem;"></span>
+      </div>
+      <div id="mysqlSchemaBox" style="margin-top:12px;max-height:140px;overflow:auto;font-size:0.98rem;color:#4a5568;background:#f1f3f7;padding:10px 12px;border-radius:8px;display:none;"></div>
     </div>
     <div class="chat-window" id="chatWindow"></div>
     <form class="input-row" id="chatForm" autocomplete="off">
@@ -250,8 +252,16 @@
         password: document.getElementById('mysqlPassword').value,
         database: document.getElementById('mysqlDatabase').value
       };
+      let timeoutId;
       try {
-        const res = await fetch('/api/mysql/config', {
+        // Timeout after 7 seconds
+        const fetchWithTimeout = (url, options, timeout = 7000) => {
+          return Promise.race([
+            fetch(url, options),
+            new Promise((_, reject) => timeoutId = setTimeout(() => reject(new Error('Connection timed out')), timeout))
+          ]);
+        };
+        const res = await fetchWithTimeout('/api/mysql/config', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(config)
@@ -260,13 +270,15 @@
         mysqlStatus.textContent = 'Connected!';
         mysqlStatus.style.color = '#2e7d32';
         // Fetch schema
-        const schemaRes = await fetch('/api/mysql/schema');
+        const schemaRes = await fetchWithTimeout('/api/mysql/schema');
         const schemaData = await schemaRes.json();
         mysqlSchemaBox.textContent = schemaData.schema;
         mysqlSchemaBox.style.display = 'block';
       } catch (err) {
         mysqlStatus.textContent = 'Error: ' + err.message;
         mysqlStatus.style.color = '#c53030';
+      } finally {
+        clearTimeout(timeoutId);
       }
     });
 
