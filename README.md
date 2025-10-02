@@ -1,28 +1,35 @@
+
 # SpeakWithSQL
 
-A realistic Node.js + Express application that lets users ask questions in natural language and receive SQL queries as responses, powered by OpenAI. Designed for developers, researchers, and data teams who want to quickly generate SQL from plain English, with a focus on academic and research data.
+SpeakWithSQL is a simple Node.js + Express demo that lets you ask questions in plain English and get SQL queries as answers, powered by OpenAI. It’s designed to show how natural language can be used to generate SQL for real-world databases.
+
+## Demo
+
+![Demo GIF](https://github.com/user-attachments/assets/e79360c7-1968-46ca-a1ac-d98622e567c1)
 
 ## Features
-- Converts user questions into SQL queries using OpenAI's API
-- Sends database schema metadata to OpenAI for accurate SQL generation
-- Clean chat interface for interaction
+
+- Convert natural language questions to SQL queries using OpenAI
+- Choose your SQL dialect (SQLite, PostgreSQL, MySQL, MSSQL)
+- Modern, clean chat interface (with avatars and responsive design)
+- Few-shot prompt engineering for better SQL quality
+- Example academic/research database schema and dummy data
 - Modular backend (Express, controllers, routes, services)
-- Example SQL schema and dummy data for academic/research use cases
-- Ready for integration with any SQL database (SQLite, PostgreSQL, MySQL, etc.)
 
 ## How It Works
-1. User types a question in the chat interface (e.g., "List all users who published in 2024").
-2. The backend sends the question and database schema metadata to OpenAI.
-3. OpenAI returns a SQL query as a response.
-4. The SQL is shown to the user (not executed by default).
+
+1. Type a question in the chat (e.g., "List all users and their ORCID numbers.")
+2. Select your SQL dialect
+3. The backend sends your question and schema to OpenAI
+4. OpenAI returns a SQL query, which is shown in the chat
 
 ## Getting Started
 
-### Prerequisites
-- Node.js (v18 or later recommended)
+**Prerequisites:**
+- Node.js (v18 or later)
 - An OpenAI API key ([get one here](https://platform.openai.com/account/api-keys))
 
-### Installation
+**Installation:**
 1. Clone the repository:
    ```sh
    git clone https://github.com/mobilerast/speakwithsql.git
@@ -38,16 +45,23 @@ A realistic Node.js + Express application that lets users ask questions in natur
    ```
 4. (Optional) Set up your SQL database using `dummy_data.sql`.
 
-### Running the App
-- Start the server:
-  ```sh
-  npm run dev
-  # or
-  npm start
-  ```
-- Open [http://localhost:3000](http://localhost:3000) in your browser.
+**Running the App:**
+```sh
+npm run dev
+# or
+npm start
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Example Questions
+
+- List all users and their ORCID numbers.
+- Show the names of users and the universities they are affiliated with, only for users from Boğaziçi Üniversitesi.
+- How many publications does each user have? List user names with their publication counts.
+- List all publications from the year 2024 with their titles and citation counts.
 
 ## Project Structure
+
 ```
 speakwithsql/
  ├── package.json
@@ -66,16 +80,17 @@ speakwithsql/
 ```
 
 ## Author
-- Mehmet Alp ([mehmet.alp@rastmobile.com](mailto:mehmet.alp@rastmobile.com))
+
+Mehmet Alp ([mehmet.alp@rastmobile.com](mailto:mehmet.alp@rastmobile.com))
 
 ## Repository
-- GitHub: https://github.com/mobilerast/speakwithsql
+
+GitHub: https://github.com/mobilerast/speakwithsql
 
 ## About Rastmobile AI Solutions
-- Learn more: https://rastmobile.com/en/services/ai-server-llm-services
+
+Learn more: https://rastmobile.com/en/services/ai-server-llm-services
 
 ## Disclaimer
-- This project is for demonstration and prototyping purposes. It does not execute SQL queries by default. Always review generated SQL before running it on your database.
 
-## Keywords
-speak to sql, speak to db, sql generator, openai, natural language to sql, academic data, research data
+This project is for demonstration and prototyping purposes. It does not execute SQL queries by default. Always review generated SQL before running it on your database.
