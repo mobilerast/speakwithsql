@@ -30,8 +30,27 @@
     }
     header {
       background: #f7f9fc;
-      padding: 18px 0 6px 0;
+      padding: 24px 0 10px 0;
       border-bottom: 1px solid #e2e8f0;
+      text-align: center;
+    }
+    .chat-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #23272f;
+      margin: 0 auto;
+      letter-spacing: -1px;
+      text-align: center;
+      line-height: 1.1;
+    }
+    .chat-desc {
+      font-size: 1.13rem;
+      color: #4a5568;
+      margin-top: 8px;
+      margin-bottom: 0;
+      text-align: center;
+      font-weight: 500;
+      letter-spacing: 0.01em;
     }
     .chat-title {
       font-size: 2.1rem;
@@ -105,22 +124,6 @@
       color: #3182ce;
       flex-shrink: 0;
       box-shadow: 0 2px 8px rgba(44,62,80,0.04);
-    }
-    .user {
-      flex-direction: row-reverse;
-    }
-    .user .avatar {
-      background: linear-gradient(135deg, #3182ce 60%, #2563eb 100%);
-      color: #fff;
-    }
-    .bubble {
-      padding: 14px 22px;
-      border-radius: 22px;
-      font-size: 1.08rem;
-      line-height: 1.6;
-      box-shadow: 0 2px 8px rgba(44,62,80,0.04);
-      display: inline-block;
-      position: relative;
       min-width: 40px;
       min-height: 24px;
       transition: background 0.2s;
@@ -150,27 +153,6 @@
       border-radius: 18px 0 0 18px;
       border: 1.5px solid #cbd5e1;
       font-size: 1.12rem;
-      outline: none;
-      background: #f8fafc;
-      border-right: none;
-    }
-    .chat-input:focus {
-      border: 1.5px solid #3182ce;
-      border-right: none;
-    }
-    .send-btn {
-      background: linear-gradient(135deg, #3182ce 60%, #2563eb 100%);
-      color: #fff;
-      border: none;
-      border-radius: 0 18px 18px 0;
-      padding: 0 32px;
-      font-size: 1.12rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 8px rgba(44,62,80,0.04);
-      height: 48px;
-      border-left: 1.5px solid #cbd5e1;
     }
     .send-btn:hover {
       background: linear-gradient(135deg, #2563eb 60%, #3182ce 100%);
