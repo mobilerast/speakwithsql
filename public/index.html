@@ -96,12 +96,31 @@
 </head>
 <body>
   <div class="chat-container">
-    <div class="chat-title">Speak with SQL</div>
+    <header style="text-align:center; margin-bottom:10px;">
+      <h1 style="margin:0;font-size:2rem;font-weight:700;color:#2d3748;">SpeakWithSQL</h1>
+      <div style="font-size:1rem;color:#4a5568;">Natural Language to SQL Demo</div>
+    </header>
+    <div style="margin-bottom:10px; text-align:center;">
+      <label for="dialectSelect" style="font-size:0.95rem;color:#2d3748;">SQL Dialect:</label>
+      <select id="dialectSelect" style="margin-left:8px;padding:4px 10px;border-radius:8px;border:1px solid #cbd5e1;font-size:1rem;">
+        <option value="SQLite">SQLite</option>
+        <option value="PostgreSQL">PostgreSQL</option>
+        <option value="MySQL">MySQL</option>
+        <option value="MSSQL">MSSQL</option>
+      </select>
+    </div>
     <div class="chat-window" id="chatWindow"></div>
     <form class="input-row" id="chatForm" autocomplete="off">
       <input type="text" id="chatInput" class="chat-input" placeholder="Type your message..." required />
       <button type="submit" class="send-btn">Send</button>
     </form>
+    <footer style="margin-top:18px;text-align:center;font-size:0.95rem;color:#4a5568;">
+      <div>Powered by <a href="https://rastmobile.com/en/services/ai-server-llm-services" target="_blank" style="color:#3182ce;text-decoration:none;">Rastmobile AI Solutions</a></div>
+      <div style="margin-top:4px;">
+        <a href="https://github.com/mobilerast/speakwithsql" target="_blank" style="color:#3182ce;text-decoration:none;">Give a star on GitHub</a> |
+        Contact: <a href="mailto:mehmet.alp@rastmobile.com" style="color:#3182ce;text-decoration:none;">mehmet.alp@rastmobile.com</a>
+      </div>
+    </footer>
   </div>
   <script>
     const chatWindow = document.getElementById('chatWindow');
@@ -116,9 +135,11 @@
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
+    const dialectSelect = document.getElementById('dialectSelect');
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const message = chatInput.value.trim();
+      const dialect = dialectSelect.value;
       if (!message) return;
       appendMessage(message, 'user');
       chatInput.value = '';
@@ -126,7 +147,7 @@
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message })
+          body: JSON.stringify({ message, dialect })
         });
         const data = await res.json();
         appendMessage(data.reply, 'bot');

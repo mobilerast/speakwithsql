@@ -44,5 +44,53 @@ async function getSQLFromOpenAI(userQuestion) {
     return '-- Error: Could not generate SQL.';
   }
 }
+// Few-shot Q&A examples for better SQL generation
+const fewShotExamples = `
+Example 1:
+User question: List all users.
+SQL:
+SELECT * FROM users;
+
+Example 2:
+User question: Show all publications from 2024.
+SQL:
+SELECT * FROM publications WHERE year = 2024;
+
+Example 3:
+User question: List the names of users and their universities.
+SQL:
+SELECT u.full_name, un.name FROM users u JOIN universities un ON u.university_id = un.id;
+`;
+
+async function getSQLFromOpenAI(userQuestion, dialect = 'SQLite') {
+  const prompt = `Given the following database schema:\n${dbMetadata}\n\nTarget SQL dialect: ${dialect}\n\n${fewShotExamples}\nUser question: ${userQuestion}\n\nWrite a single SQL query (no explanation, just SQL):`;
+
+  try {
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant that writes SQL queries for the given database schema and dialect.' },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 256,
+        temperature: 0.2
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    // Extract SQL from OpenAI response
+    const sql = response.data.choices[0].message.content.trim();
+    return sql;
+  } catch (error) {
+    console.error('OpenAI API error:', error.response?.data || error.message);
+    return '-- Error: Could not generate SQL.';
+  }
+}
 
 module.exports = { getSQLFromOpenAI };
