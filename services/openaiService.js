@@ -1,7 +1,9 @@
 require('dotenv').config();
 const axios = require('axios');
+const pgService = require('./postgresService');
+const postProcessor = require('./sqlPostProcessor');
 
-// Extracted metadata from dummy_data.sql
+// A small schema hint if no DB connection is configured (keeps previous metadata)
 const dbMetadata = `
 Tables and columns:
 - universities(id, name)
@@ -14,37 +16,6 @@ Tables and columns:
 - publication_citations(id, publication_id, citation_count, year)
 `;
 
-async function getSQLFromOpenAI(userQuestion) {
-  const prompt = `Given the following database schema:\n${dbMetadata}\n\nUser question: ${userQuestion}\n\nWrite a single SQL query (no explanation, just SQL):`;
-
-  try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-3.5-turbo',
-        messages: [
-          { role: 'system', content: 'You are a helpful assistant that writes SQL queries for the given database schema.' },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 256,
-        temperature: 0.2
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    // Extract SQL from OpenAI response
-    const sql = response.data.choices[0].message.content.trim();
-    return sql;
-  } catch (error) {
-    console.error('OpenAI API error:', error.response?.data || error.message);
-    return '-- Error: Could not generate SQL.';
-  }
-}
-// Few-shot Q&A examples for better SQL generation
 const fewShotExamples = `
 Example 1:
 User question: List all users.
@@ -62,8 +33,8 @@ SQL:
 SELECT u.full_name, un.name FROM users u JOIN universities un ON u.university_id = un.id;
 `;
 
-async function getSQLFromOpenAI(userQuestion, dialect = 'SQLite') {
-  const prompt = `Given the following database schema:\n${dbMetadata}\n\nTarget SQL dialect: ${dialect}\n\n${fewShotExamples}\nUser question: ${userQuestion}\n\nWrite a single SQL query (no explanation, just SQL):`;
+async function getSQLFromOpenAI(userQuestion, dialect = 'postgres') {
+  const prompt = `Given the following database schema (if available we'll use live schema):\n${dbMetadata}\n\nTarget SQL dialect: ${dialect}\n\n${fewShotExamples}\nUser question: ${userQuestion}\n\nWrite a single SQL query (no explanation, just SQL):`;
 
   try {
     const response = await axios.post(
@@ -74,7 +45,7 @@ async function getSQLFromOpenAI(userQuestion, dialect = 'SQLite') {
           { role: 'system', content: 'You are a helpful assistant that writes SQL queries for the given database schema and dialect.' },
           { role: 'user', content: prompt }
         ],
-        max_tokens: 256,
+        max_tokens: 512,
         temperature: 0.2
       },
       {
@@ -85,11 +56,35 @@ async function getSQLFromOpenAI(userQuestion, dialect = 'SQLite') {
       }
     );
     // Extract SQL from OpenAI response
-    const sql = response.data.choices[0].message.content.trim();
-    return sql;
+    let sql = response.data.choices[0].message.content.trim();
+
+    // Try to fetch live schema metadata from Postgres if configured
+    let schema = null;
+    try {
+      const md = await pgService.getSchemaMetadata();
+      if (md) schema = md; // { schemaText, tables, fks }
+    } catch (err) {
+      // ignore; we'll fallback to dbMetadata hint
+      console.warn('Could not fetch Postgres metadata:', err.message || err);
+    }
+
+    // Normalize case-equality and parameterize
+    const norm = postProcessor.normalizeCaseEquality(sql, schema ? schema.tables : null);
+    sql = norm.sql;
+    const params = norm.params || [];
+
+    // Try to add JOINs if missing and we have schema fk info
+    let joinsAdded = [];
+    if (schema) {
+      const added = postProcessor.addJoinsIfMissing(sql, schema);
+      sql = added.sql;
+      joinsAdded = added.joinsAdded || [];
+    }
+
+    return { sql, params, joinsAdded };
   } catch (error) {
     console.error('OpenAI API error:', error.response?.data || error.message);
-    return '-- Error: Could not generate SQL.';
+    return { sql: '-- Error: Could not generate SQL.', params: [] };
   }
 }
 

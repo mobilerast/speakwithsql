@@ -34,7 +34,7 @@ async function getSchemaMetadata() {
   for (const row of tables) {
     const tableName = Object.values(row)[0];
     schema += `Table: ${tableName}\n`;
-  const [columns] = await conn.query(`SHOW COLUMNS FROM \\`${tableName}\``);
+  const [columns] = await conn.query(`SHOW COLUMNS FROM ${tableName}`);
     schema += '  Columns: ' + columns.map(col => `${col.Field} (${col.Type})`).join(', ') + '\n';
     // Foreign keys
     const [fks] = await conn.query(`SELECT COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND REFERENCED_TABLE_NAME IS NOT NULL`, [dbConfig.database, tableName]);
